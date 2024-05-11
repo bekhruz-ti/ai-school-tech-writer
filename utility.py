@@ -10,7 +10,7 @@ def format_data_for_openai(diffs, readme_content, commit_messages):
         for file in diffs
     ])
     commit_messages = '\n'.join(commit_messages) + '\n\n'
-    readme_content = base64.b64decode(readme_content).decode('utf-8')
+    readme_content = base64.b64decode(readme_content.content).decode('utf-8')
 
     prompt = f"""Please review the following code changes and commit messages from a GitHub pull request:
         ## Code changes from Pull Request:
