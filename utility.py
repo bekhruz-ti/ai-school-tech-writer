@@ -36,7 +36,7 @@ def call_openai(prompt):
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo-0125",
         messages = [
-            {"role": "system", "content": "You are an AI trained to help with updateing README files based on commit messages and code changes."},
+            {"role": "system", "content": "You are an AI trained to update README files based on commit messages and code changes."},
             {"role": "user", "content": prompt}
         ]
     )
