@@ -57,7 +57,6 @@ def update_readme_and_create_pr(repo, updated_readme, readme_sha):
     
     pull_request = repo.create_pull(
         title="AI PR: Update README based on recent change", 
-        body="This is an AI PR. Please review the README", 
-        head=new_branch_name, base="main")
+        body="This is an AI PR. Please review the README", head=new_branch_name, base="main")
     
     return pull_request
