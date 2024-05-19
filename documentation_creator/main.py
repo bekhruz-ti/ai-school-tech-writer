@@ -9,7 +9,7 @@ INDEX_NAME = 'project-docs'
 namespace = str(uuid.uuid4())
 
 def main(drive_link, template_id):
-
+    
     docs = download_drive_docs(drive_link)
 
     document_ids = upload_documents_to_pinecone(docs, INDEX_NAME, namespace, chunk_size=2500)
@@ -29,5 +29,5 @@ def main(drive_link, template_id):
     return document
 
 if __name__ == '__main__':
-    final_doc = main("1pvmioD9xQ7vGdSztlvkpmk_R4C2rVSvf", '19FlXUYAR5bcMO9gIBUIsFhWP0EG56PYa1zSkDUFUkN4')
+    final_doc = main("", '19FlXUYAR5bcMO9gIBUIsFhWP0EG56PYa1zSkDUFUkN4')
     print(final_doc)

@@ -1,9 +1,3 @@
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.schema import Document
-from langchain_openai import ChatOpenAI
-from langchain.prompts.prompt import PromptTemplate
-from langchain.chains.llm import LLMChain
-from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import CharacterTextSplitter
 import uuid
 import os
