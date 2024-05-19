@@ -42,3 +42,23 @@ Refer to the information below as you fill out the template:
 {information}
 ```
 """
+
+
+INFERENCE_PROMPT = """I am an intelligent inference component of a Retrieval-Augmented Generation (RAG) model. My task is to provide responses to queries based on documents that serve as a basis for inference. I will use the information gathered from these documents to answer questions as accurately as possible. As an intelligent component:
+
+- Before responding to a query, I will take a moment to understand the relevant information from the documents.
+- I will keep in mind that none of the identified information is definitive, so I will weigh each one appropriately within the context.
+- I will strive to accurately infer answers by assimilating the information from the documents.
+- I will be held accountable, so I will provide a justification for my response.
+- I will not incorporate every piece of information into the answer individually, instead, I will merge them to form a cohesive response that effectively addresses the query.
+
+I will generate an answer that aligns with the anticipated response based on the documents, even if the information does not provide a direct answer.
+
+The information I will use to infer the answer are:
+```
+{information}
+```
+
+I will respond in the following format:
+{{"Question": "<question asked>", "Answer": "<inferred answer>", "Justification": "<justification>"}}
+"""

@@ -9,6 +9,7 @@ from typing import Any, Tuple, Dict
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import io
+import re
 from docx2python import docx2python
 import json
 from PyPDF2 import PdfFileReader
@@ -57,25 +58,19 @@ class Documents(BaseModel):
     metadata: Dict[str, Any]
     content: str
 
-def download_document(file_id: str) -> Tuple[Dict, str]:
-    gauth = GoogleAuth(settings=gauth_settings)
-    gauth.ServiceAuth()
-    gdrive_client = GoogleDrive(gauth)
-    file = gdrive_client.CreateFile({'id': file_id})
-    content = file.GetContentString(mimetype='text/plain')
-    full_metadata = file.metadata
-    metadata = {
-        'title': full_metadata.get('title'),
-        'file_type': full_metadata.get('mimeType'),
-        'file_link': full_metadata.get('alternateLink'),
-        'id': full_metadata.get('id'),
-        'owner': full_metadata.get('ownerNames')[0] if full_metadata.get('ownerNames') else None
-    }
-    return metadata, content
-
-def download_document2(document_id: str) -> Tuple[str, str]:
+def download_document(document_id: str) -> Tuple[str, str]:
     service = build('drive', 'v3', credentials=credentials)
-    request = service.files().get_media(fileId=document_id)
+    
+    # Get the file's metadata
+    metadata = service.files().get(fileId=document_id).execute()
+    
+    # Check if the file is a Google Workspace document
+    if 'google-apps' in metadata['mimeType']:
+        # Use files.export for Google Workspace documents
+        request = service.files().export_media(fileId=document_id, mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    else:
+        # Use files.get_media for other file types
+        request = service.files().get_media(fileId=document_id)
 
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
@@ -85,12 +80,8 @@ def download_document2(document_id: str) -> Tuple[str, str]:
 
     fh.seek(0)
     doc_content = docx2python(fh)
-    content = doc_content.text  # extract text from the docx file
 
-    # assuming you want to return the file's metadata as well
-    metadata = service.files().get(fileId=document_id).execute()
-
-    return metadata, re.sub(r'(\n)+', '\n', text)
+    return metadata, re.sub(r'(\n)+', '\n', doc_content.text)
 
 def download_drive_docs(drive_folder_id: str) -> Dict[str, dict]:
     # Assuming 'credentials' is already defined and authorized
@@ -112,16 +103,11 @@ def download_drive_docs(drive_folder_id: str) -> Dict[str, dict]:
                 'content': content,
                 'metadata': metadata
             }
+            print(f"Downloaded document {file_id}")
         except Exception as e:
-            try:
-                metadata, content = download_document(file_id)
-                documents[file_id] = {
-                    'content': content,
-                    'metadata': metadata
-                }
-            except Exception as e:
-                print(f"{e}. {file_id}")
+            print(f"{e}. {file_id}")
     return documents
 
 if __name__=='__main__':
-    print(json.dumps(fetch_all_documents('1pvmioD9xQ7vGdSztlvkpmk_R4C2rVSvf'), indent = 2))
+    result = download_drive_docs('1pvmioD9xQ7vGdSztlvkpmk_R4C2rVSvf')
+    print(len(result))
