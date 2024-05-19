@@ -61,21 +61,17 @@ def download_document(file_id: str) -> Tuple[Dict, str]:
     gauth = GoogleAuth(settings=gauth_settings)
     gauth.ServiceAuth()
     gdrive_client = GoogleDrive(gauth)
-    try:
-        file = gdrive_client.CreateFile({'id': file_id})
-        content = file.GetContentString(mimetype='text/plain')
-        full_metadata = file.metadata
-        metadata = {
-            'title': full_metadata.get('title'),
-            'file_type': full_metadata.get('mimeType'),
-            'file_link': full_metadata.get('alternateLink'),
-            'id': full_metadata.get('id'),
-            'owner': full_metadata.get('ownerNames')[0] if full_metadata.get('ownerNames') else None
-        }
-        return metadata, content
-    except Exception as e:
-        print(traceback.format_exc())
-        raise
+    file = gdrive_client.CreateFile({'id': file_id})
+    content = file.GetContentString(mimetype='text/plain')
+    full_metadata = file.metadata
+    metadata = {
+        'title': full_metadata.get('title'),
+        'file_type': full_metadata.get('mimeType'),
+        'file_link': full_metadata.get('alternateLink'),
+        'id': full_metadata.get('id'),
+        'owner': full_metadata.get('ownerNames')[0] if full_metadata.get('ownerNames') else None
+    }
+    return metadata, content
 
 def download_document2(document_id: str) -> Tuple[str, str]:
     service = build('drive', 'v3', credentials=credentials)
@@ -96,7 +92,7 @@ def download_document2(document_id: str) -> Tuple[str, str]:
 
     return metadata, re.sub(r'(\n)+', '\n', text)
 
-def fetch_all_documents(drive_folder_id: str) -> Dict[str, dict]:
+def download_drive_docs(drive_folder_id: str) -> Dict[str, dict]:
     # Assuming 'credentials' is already defined and authorized
     service = build('drive', 'v3', credentials=credentials)
     
@@ -117,7 +113,14 @@ def fetch_all_documents(drive_folder_id: str) -> Dict[str, dict]:
                 'metadata': metadata
             }
         except Exception as e:
-            print(f"Failed download on {file_id}")
+            try:
+                metadata, content = download_document(file_id)
+                documents[file_id] = {
+                    'content': content,
+                    'metadata': metadata
+                }
+            except Exception as e:
+                print(f"{e}. {file_id}")
     return documents
 
 if __name__=='__main__':
